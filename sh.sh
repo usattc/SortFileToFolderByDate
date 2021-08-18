@@ -4,6 +4,11 @@ Cyan='\033[0;36m'
 Orange='\033[0;33m'
 NC='\033[0m' # No Color
 
+# 是否要移入子文件夹, '' 则不移
+# 子文件夹有空格用正常空格
+subFolder=''
+subFolderSize=${#subFolder}
+
 for file in *; do
 # 过滤文件后缀
 if [ "${file##*.}"x = "sh"x ]
@@ -34,7 +39,25 @@ elif [[ -f $file ]]
         echo "${Blue}创建文件夹${NC}"
     fi
     
-    mv $file $folder
+    # 需要处理子文件夹
+    if [ 1 -eq "$(echo "${subFolderSize} > 0" | bc)" ]
+        then
+        cd $folder
+        
+        if [ -d "$subFolder" ]
+            then
+            echo "${Blue}子文件夹已存在${NC}"
+        else
+            mkdir "$subFolder"
+            echo "${Blue}创建子文件夹${NC}"
+        fi
+        
+        cd ..
+        mv $file "$folder/$subFolder"
+        echo "${Blue}移入子文件夹 $subFolder${NC}"
+    else
+        mv $file $folder
+    fi
 else
     echo "${RED}$file 异常${NC}"
     exit 1
